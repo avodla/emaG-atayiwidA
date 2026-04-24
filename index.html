@@ -3,221 +3,244 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Game Adiwiyata: Sekolah Hijau</title>
+  <title>Game Balap Adiwiyata</title>
   <style>
     body {
       margin: 0;
       font-family: Arial, Helvetica, sans-serif;
-      background: linear-gradient(#b7e4c7, #52b788);
+      background: linear-gradient(#a8dadc, #457b9d);
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
+      height: 100vh;
     }
 
     .game-container {
-      background: #ffffff;
+      background: #f1faee;
       width: 900px;
       max-width: 95%;
       border-radius: 16px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
       padding: 20px;
     }
 
     h1 {
       text-align: center;
-      color: #2d6a4f;
-      margin-bottom: 10px;
+      color: #1d3557;
     }
 
     p {
       text-align: center;
-      color: #344e41;
+      color: #457b9d;
+      margin-bottom: 10px;
     }
 
     .info {
       display: flex;
       justify-content: space-between;
-      margin: 15px 0;
       font-weight: bold;
-      color: #1b4332;
+      margin-bottom: 10px;
+      color: #1d3557;
     }
 
-    .area {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 15px;
-      margin-top: 20px;
-    }
-
-    .card {
-      background: #d8f3dc;
+    canvas {
+      background: #2b2b2b;
+      display: block;
+      margin: 0 auto;
       border-radius: 12px;
-      padding: 20px;
-      text-align: center;
-      cursor: pointer;
-      transition: transform 0.2s, background 0.2s;
-      user-select: none;
-    }
-
-    .card:hover {
-      transform: scale(1.05);
-      background: #95d5b2;
-    }
-
-    .card.correct {
-      background: #52b788;
-      color: #ffffff;
-      cursor: default;
-    }
-
-    .card.wrong {
-      background: #e63946;
-      color: #ffffff;
+      border: 4px solid #1d3557;
     }
 
     .footer {
-      margin-top: 20px;
       text-align: center;
+      margin-top: 10px;
       font-size: 14px;
-      color: #2d6a4f;
+      color: #1d3557;
     }
 
     button {
-      margin-top: 15px;
+      display: block;
+      margin: 10px auto 0;
       padding: 10px 20px;
+      font-size: 16px;
+      background: #1d3557;
+      color: white;
       border: none;
       border-radius: 8px;
-      background: #2d6a4f;
-      color: white;
-      font-size: 16px;
       cursor: pointer;
     }
 
     button:hover {
-      background: #1b4332;
+      background: #0b2545;
     }
   </style>
 </head>
 <body>
   <div class="game-container">
-    <h1>Game Adiwiyata 🌱</h1>
-    <p>Pilih tindakan yang mendukung sekolah ramah lingkungan</p>
+    <h1>Game Balap Sekolah Adiwiyata 🏁🌱</h1>
+    <p>Kendarai motor ramah lingkungan dan kumpulkan aksi hijau!</p>
 
     <div class="info">
       <div>Skor: <span id="score">0</span></div>
-      <div>Soal: <span id="question-number">1</span>/5</div>
+      <div>Nyawa: <span id="life">3</span></div>
     </div>
 
-    <div id="question" style="font-weight: bold; text-align: center;"></div>
+    <canvas id="gameCanvas" width="800" height="400"></canvas>
 
-    <div class="area" id="choices"></div>
+    <button onclick="restartGame()">Restart Game</button>
 
-    <div style="text-align: center;">
-      <button onclick="nextQuestion()">Soal Berikutnya</button>
-    </div>
-
-    <div class="footer">
-      © Game Edukasi Sekolah Adiwiyata
-    </div>
+    <div class="footer">© Game Edukasi Adiwiyata</div>
   </div>
 
   <script>
-    const questions = [
-      {
-        question: "Apa yang harus dilakukan setelah minum air kemasan?",
-        options: [
-          { text: "Membuangnya ke sungai", correct: false },
-          { text: "Membakar sampah plastik", correct: false },
-          { text: "Membuang ke tempat sampah daur ulang", correct: true },
-          { text: "Meninggalkannya di kelas", correct: false }
-        ]
-      },
-      {
-        question: "Kegiatan apa yang mencerminkan sekolah Adiwiyata?",
-        options: [
-          { text: "Menebang pohon di sekolah", correct: false },
-          { text: "Kerja bakti membersihkan lingkungan", correct: true },
-          { text: "Membiarkan sampah menumpuk", correct: false },
-          { text: "Mencoret-coret tembok", correct: false }
-        ]
-      },
-      {
-        question: "Lampu di kelas sebaiknya dimatikan ketika…",
-        options: [
-          { text: "Kelas kosong", correct: true },
-          { text: "Sedang pelajaran", correct: false },
-          { text: "Hari mendung", correct: false },
-          { text: "Guru datang", correct: false }
-        ]
-      },
-      {
-        question: "Manfaat menanam pohon di sekolah adalah…",
-        options: [
-          { text: "Membuat sekolah lebih panas", correct: false },
-          { text: "Mengotori halaman", correct: false },
-          { text: "Menyerap air dan menghasilkan oksigen", correct: true },
-          { text: "Mengganggu belajar", correct: false }
-        ]
-      },
-      {
-        question: "Contoh penghematan air di sekolah adalah…",
-        options: [
-          { text: "Membiarkan kran terbuka", correct: false },
-          { text: "Menggunakan air seperlunya", correct: true },
-          { text: "Bermain air", correct: false },
-          { text: "Menyiram halaman berlebihan", correct: false }
-        ]
-      }
-    ];
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
 
-    let currentQuestion = 0;
     let score = 0;
+    let life = 3;
+    let gameSpeed = 4;
+    let gameOver = false;
 
-    const questionEl = document.getElementById("question");
-    const choicesEl = document.getElementById("choices");
-    const scoreEl = document.getElementById("score");
-    const questionNumberEl = document.getElementById("question-number");
+    const player = {
+      x: 380,
+      y: 300,
+      width: 40,
+      height: 60,
+      speed: 6
+    };
 
-    function loadQuestion() {
-      choicesEl.innerHTML = "";
-      const q = questions[currentQuestion];
-      questionEl.textContent = q.question;
-      questionNumberEl.textContent = currentQuestion + 1;
+    const obstacles = [];
+    const greenItems = [];
 
-      q.options.forEach(option => {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.textContent = option.text;
-        card.onclick = () => selectAnswer(card, option.correct);
-        choicesEl.appendChild(card);
-      });
+    document.addEventListener("keydown", movePlayer);
+
+    function movePlayer(e) {
+      if (gameOver) return;
+      if (e.key === "ArrowLeft" && player.x > 200) player.x -= player.speed;
+      if (e.key === "ArrowRight" && player.x < 560) player.x += player.speed;
     }
 
-    function selectAnswer(card, correct) {
-      const cards = document.querySelectorAll(".card");
-      cards.forEach(c => (c.onclick = null));
+    function drawRoad() {
+      ctx.fillStyle = "#444";
+      ctx.fillRect(200, 0, 400, canvas.height);
 
-      if (correct) {
-        card.classList.add("correct");
-        score += 20;
-        scoreEl.textContent = score;
-      } else {
-        card.classList.add("wrong");
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 4;
+      ctx.setLineDash([20, 20]);
+      ctx.beginPath();
+      ctx.moveTo(400, 0);
+      ctx.lineTo(400, canvas.height);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    function drawPlayer() {
+      ctx.fillStyle = "#2a9d8f";
+      ctx.fillRect(player.x, player.y, player.width, player.height);
+    }
+
+    function createObstacle() {
+      const x = 220 + Math.random() * 340;
+      obstacles.push({ x: x, y: -60, width: 40, height: 60 });
+    }
+
+    function createGreenItem() {
+      const x = 220 + Math.random() * 340;
+      greenItems.push({ x: x, y: -40, size: 30 });
+    }
+
+    function drawObstacles() {
+      ctx.fillStyle = "#e63946";
+      obstacles.forEach(o => ctx.fillRect(o.x, o.y, o.width, o.height));
+    }
+
+    function drawGreenItems() {
+      ctx.fillStyle = "#52b788";
+      greenItems.forEach(i => ctx.fillRect(i.x, i.y, i.size, i.size));
+    }
+
+    function updateObjects() {
+      obstacles.forEach(o => (o.y += gameSpeed));
+      greenItems.forEach(i => (i.y += gameSpeed));
+
+      for (let i = obstacles.length - 1; i >= 0; i--) {
+        if (collision(player, obstacles[i])) {
+          obstacles.splice(i, 1);
+          life--;
+          document.getElementById("life").textContent = life;
+          if (life <= 0) gameOver = true;
+        } else if (obstacles[i].y > canvas.height) {
+          obstacles.splice(i, 1);
+        }
+      }
+
+      for (let i = greenItems.length - 1; i >= 0; i--) {
+        if (collision(player, greenItems[i])) {
+          greenItems.splice(i, 1);
+          score += 10;
+          document.getElementById("score").textContent = score;
+        } else if (greenItems[i].y > canvas.height) {
+          greenItems.splice(i, 1);
+        }
       }
     }
 
-    function nextQuestion() {
-      if (currentQuestion < questions.length - 1) {
-        currentQuestion++;
-        loadQuestion();
+    function collision(a, b) {
+      return (
+        a.x < b.x + (b.width || b.size) &&
+        a.x + a.width > b.x &&
+        a.y < b.y + (b.height || b.size) &&
+        a.y + a.height > b.y
+      );
+    }
+
+    function drawGameOver() {
+      ctx.fillStyle = "rgba(0,0,0,0.7)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "white";
+      ctx.font = "30px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("GAME OVER", canvas.width / 2, 180);
+      ctx.font = "20px Arial";
+      ctx.fillText("Skor Akhir: " + score, canvas.width / 2, 220);
+    }
+
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawRoad();
+      drawPlayer();
+      drawObstacles();
+      drawGreenItems();
+      updateObjects();
+
+      if (gameOver) {
+        drawGameOver();
       } else {
-        questionEl.textContent = "Game selesai! Skor akhir kamu: " + score;
-        choicesEl.innerHTML = "";
+        requestAnimationFrame(gameLoop);
       }
     }
 
-    loadQuestion();
+    setInterval(() => {
+      if (!gameOver) createObstacle();
+    }, 1200);
+
+    setInterval(() => {
+      if (!gameOver) createGreenItem();
+    }, 2000);
+
+    function restartGame() {
+      score = 0;
+      life = 3;
+      gameOver = false;
+      obstacles.length = 0;
+      greenItems.length = 0;
+      player.x = 380;
+      document.getElementById("score").textContent = score;
+      document.getElementById("life").textContent = life;
+      gameLoop();
+    }
+
+    gameLoop();
   </script>
 </body>
 </html>
