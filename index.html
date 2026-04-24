@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game Adiwiyata: Sekolah Hijau</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(#b7e4c7, #52b788);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .game-container {
+      background: #ffffff;
+      width: 900px;
+      max-width: 95%;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #2d6a4f;
+      margin-bottom: 10px;
+    }
+
+    p {
+      text-align: center;
+      color: #344e41;
+    }
+
+    .info {
+      display: flex;
+      justify-content: space-between;
+      margin: 15px 0;
+      font-weight: bold;
+      color: #1b4332;
+    }
+
+    .area {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .card {
+      background: #d8f3dc;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.2s;
+      user-select: none;
+    }
+
+    .card:hover {
+      transform: scale(1.05);
+      background: #95d5b2;
+    }
+
+    .card.correct {
+      background: #52b788;
+      color: #ffffff;
+      cursor: default;
+    }
+
+    .card.wrong {
+      background: #e63946;
+      color: #ffffff;
+    }
+
+    .footer {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 14px;
+      color: #2d6a4f;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background: #2d6a4f;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1b4332;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <h1>Game Adiwiyata 🌱</h1>
+    <p>Pilih tindakan yang mendukung sekolah ramah lingkungan</p>
+
+    <div class="info">
+      <div>Skor: <span id="score">0</span></div>
+      <div>Soal: <span id="question-number">1</span>/5</div>
+    </div>
+
+    <div id="question" style="font-weight: bold; text-align: center;"></div>
+
+    <div class="area" id="choices"></div>
+
+    <div style="text-align: center;">
+      <button onclick="nextQuestion()">Soal Berikutnya</button>
+    </div>
+
+    <div class="footer">
+      © Game Edukasi Sekolah Adiwiyata
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        question: "Apa yang harus dilakukan setelah minum air kemasan?",
+        options: [
+          { text: "Membuangnya ke sungai", correct: false },
+          { text: "Membakar sampah plastik", correct: false },
+          { text: "Membuang ke tempat sampah daur ulang", correct: true },
+          { text: "Meninggalkannya di kelas", correct: false }
+        ]
+      },
+      {
+        question: "Kegiatan apa yang mencerminkan sekolah Adiwiyata?",
+        options: [
+          { text: "Menebang pohon di sekolah", correct: false },
+          { text: "Kerja bakti membersihkan lingkungan", correct: true },
+          { text: "Membiarkan sampah menumpuk", correct: false },
+          { text: "Mencoret-coret tembok", correct: false }
+        ]
+      },
+      {
+        question: "Lampu di kelas sebaiknya dimatikan ketika…",
+        options: [
+          { text: "Kelas kosong", correct: true },
+          { text: "Sedang pelajaran", correct: false },
+          { text: "Hari mendung", correct: false },
+          { text: "Guru datang", correct: false }
+        ]
+      },
+      {
+        question: "Manfaat menanam pohon di sekolah adalah…",
+        options: [
+          { text: "Membuat sekolah lebih panas", correct: false },
+          { text: "Mengotori halaman", correct: false },
+          { text: "Menyerap air dan menghasilkan oksigen", correct: true },
+          { text: "Mengganggu belajar", correct: false }
+        ]
+      },
+      {
+        question: "Contoh penghematan air di sekolah adalah…",
+        options: [
+          { text: "Membiarkan kran terbuka", correct: false },
+          { text: "Menggunakan air seperlunya", correct: true },
+          { text: "Bermain air", correct: false },
+          { text: "Menyiram halaman berlebihan", correct: false }
+        ]
+      }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+
+    const questionEl = document.getElementById("question");
+    const choicesEl = document.getElementById("choices");
+    const scoreEl = document.getElementById("score");
+    const questionNumberEl = document.getElementById("question-number");
+
+    function loadQuestion() {
+      choicesEl.innerHTML = "";
+      const q = questions[currentQuestion];
+      questionEl.textContent = q.question;
+      questionNumberEl.textContent = currentQuestion + 1;
+
+      q.options.forEach(option => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.textContent = option.text;
+        card.onclick = () => selectAnswer(card, option.correct);
+        choicesEl.appendChild(card);
+      });
+    }
+
+    function selectAnswer(card, correct) {
+      const cards = document.querySelectorAll(".card");
+      cards.forEach(c => (c.onclick = null));
+
+      if (correct) {
+        card.classList.add("correct");
+        score += 20;
+        scoreEl.textContent = score;
+      } else {
+        card.classList.add("wrong");
+      }
+    }
+
+    function nextQuestion() {
+      if (currentQuestion < questions.length - 1) {
+        currentQuestion++;
+        loadQuestion();
+      } else {
+        questionEl.textContent = "Game selesai! Skor akhir kamu: " + score;
+        choicesEl.innerHTML = "";
+      }
+    }
+
+    loadQuestion();
+  </script>
+</body>
+</html>
